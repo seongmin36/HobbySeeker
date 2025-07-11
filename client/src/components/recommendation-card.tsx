@@ -12,11 +12,30 @@ export default function RecommendationCard({ recommendation }: RecommendationCar
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardContent className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">{recommendation.hobbyName}</h3>
-          <Badge variant="secondary" className="bg-primary/10 text-primary">
-            {recommendation.recommendationScore}% 매치
-          </Badge>
+        <div className="mb-4">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-xl font-bold text-gray-900">{recommendation.name}</h3>
+            <Badge variant="secondary" className="bg-primary/10 text-primary">
+              {recommendation.recommendationScore}% 매치
+            </Badge>
+          </div>
+          {recommendation.skillLevel && (
+            <div className="flex items-center gap-2 mb-2">
+              <Badge variant="outline" className="text-xs">
+                {recommendation.skillLevel}
+              </Badge>
+              {recommendation.estimatedCost && (
+                <span className="text-xs text-gray-500">
+                  💰 {recommendation.estimatedCost}
+                </span>
+              )}
+              {recommendation.timeCommitment && (
+                <span className="text-xs text-gray-500">
+                  ⏰ {recommendation.timeCommitment}
+                </span>
+              )}
+            </div>
+          )}
         </div>
         
         <p className="text-sm text-gray-600 mb-4 line-clamp-3">
@@ -39,7 +58,12 @@ export default function RecommendationCard({ recommendation }: RecommendationCar
         
         <div className="flex justify-between items-center">
           <div className="text-xs text-gray-500">
-            추천도: {recommendation.recommendationScore}%
+            {recommendation.socialAspect && (
+              <span className="inline-flex items-center gap-1">
+                <Users className="h-3 w-3" />
+                {recommendation.socialAspect}
+              </span>
+            )}
           </div>
           <Link href="/communities">
             <Button size="sm" className="bg-secondary hover:bg-secondary/90">
