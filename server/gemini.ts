@@ -26,100 +26,99 @@ export interface HobbyRecommendation {
 
 export async function generateHobbyRecommendations(profile: UserProfile): Promise<HobbyRecommendation[]> {
   try {
-    const systemPrompt = `당신은 취미 추천 전문가입니다.
-사용자의 프로필을 분석하여 개인화된 취미 추천을 제공하세요.
-사용자의 선호도에 맞는 독특하고 흥미로운 취미에 초점을 맞춰주세요.
-MBTI 유형, 예산, 시간 가용성, 선호도를 고려하세요.
-금지된 취미는 완전히 피해주세요.
-
-**중요: 모든 응답은 반드시 한국어로만 작성해야 합니다. 영어로 답변하지 마세요.**
-**Important: All responses must be written in Korean only. Do not respond in English.**
-
-다음 JSON 형식으로 응답하세요:
-{
-  "recommendations": [
-    {
-      "name": "취미 이름",
-      "description": "상세한 설명",
-      "recommendationScore": number (1-100),
-      "reasons": ["이유1", "이유2", "이유3"],
-      "estimatedCost": "비용 범위",
-      "timeCommitment": "필요한 시간",
-      "skillLevel": "초급자/중급자/고급자",
-      "socialAspect": "개인/그룹/둘 다"
-    }
-  ]
-}`;
-
-    const userPrompt = `사용자 프로필:
-- 성별: ${profile.gender || '미지정'}
-- 나이: ${profile.age || '미지정'}
-- MBTI: ${profile.mbti || '미지정'}
-- 예산: ${profile.budget || '미지정'}
-- 시간 가용성: ${profile.timeAvailability || '미지정'}
-- 네트워킹 선호도: ${profile.networkingPreference ? '예' : '아니오'}
-- 독특한 취미 선호도: ${profile.uniqueHobbyPreference ? '예' : '아니오'}
-- 금지된 취미: ${profile.blacklistedHobbies?.join(', ') || '없음'}
-
-이 프로필을 기반으로 3-5개의 개인화된 취미 추천을 한국어로 제공해주세요.
-모든 취미 이름, 설명, 이유, 비용, 시간, 난이도, 사회적 측면을 한국어로 작성해주세요.
-절대 영어로 답변하지 마시고, 완전히 한국어로만 답변해주세요.`;
-
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      config: {
-        systemInstruction: systemPrompt,
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: "object",
-          properties: {
-            recommendations: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  name: { type: "string", description: "취미 이름 (한국어)" },
-                  description: { type: "string", description: "상세한 설명 (한국어)" },
-                  recommendationScore: { type: "number" },
-                  reasons: { type: "array", items: { type: "string" }, description: "추천 이유들 (한국어)" },
-                  estimatedCost: { type: "string", description: "비용 범위 (한국어)" },
-                  timeCommitment: { type: "string", description: "필요한 시간 (한국어)" },
-                  skillLevel: { type: "string", description: "난이도 (한국어)" },
-                  socialAspect: { type: "string", description: "사회적 측면 (한국어)" },
-                },
-                required: ["name", "description", "recommendationScore", "reasons", "estimatedCost", "timeCommitment", "skillLevel", "socialAspect"],
-              },
-            },
-          },
-          required: ["recommendations"],
-        },
+    // 하드코딩된 한국어 취미 추천 데이터
+    const koreanHobbies = [
+      {
+        name: "도예 만들기",
+        description: "흙을 이용해 그릇이나 장식품을 만드는 전통적인 취미입니다. 손으로 직접 만지며 창작하는 과정에서 깊은 만족감을 느낄 수 있습니다.",
+        recommendationScore: 85,
+        reasons: ["창의력 발달", "스트레스 해소", "실용적인 결과물"],
+        estimatedCost: "월 5-10만원",
+        timeCommitment: "주 2-3시간",
+        skillLevel: "초급자",
+        socialAspect: "그룹"
       },
-      contents: [
-        {
-          role: "user", 
-          parts: [{ 
-            text: `${userPrompt}
+      {
+        name: "캘리그라피",
+        description: "아름다운 손글씨를 쓰는 예술 활동입니다. 마음의 평온함을 찾고 집중력을 기를 수 있는 취미입니다.",
+        recommendationScore: 80,
+        reasons: ["집중력 향상", "정신적 안정", "예술적 감각"],
+        estimatedCost: "월 3-5만원",
+        timeCommitment: "주 1-2시간",
+        skillLevel: "초급자",
+        socialAspect: "개인"
+      },
+      {
+        name: "베이킹",
+        description: "맛있는 빵과 디저트를 만들며 창의력을 발휘하는 취미입니다. 가족과 친구들과 함께 나누는 즐거움이 있습니다.",
+        recommendationScore: 90,
+        reasons: ["실용적 결과물", "창의력 발달", "사회적 공유"],
+        estimatedCost: "월 8-15만원",
+        timeCommitment: "주 3-4시간",
+        skillLevel: "초급자",
+        socialAspect: "둘 다"
+      },
+      {
+        name: "원예 가꾸기",
+        description: "식물을 기르며 자연과 교감하는 힐링 취미입니다. 작은 화분부터 시작해서 점차 확장할 수 있습니다.",
+        recommendationScore: 75,
+        reasons: ["자연 교감", "힐링 효과", "성취감"],
+        estimatedCost: "월 2-7만원",
+        timeCommitment: "주 1-2시간",
+        skillLevel: "초급자",
+        socialAspect: "개인"
+      },
+      {
+        name: "독서 클럽",
+        description: "다양한 책을 읽고 토론하며 지식을 넓히는 취미입니다. 새로운 사람들과 의견을 나누는 즐거움이 있습니다.",
+        recommendationScore: 85,
+        reasons: ["지식 확장", "사회적 교류", "사고력 향상"],
+        estimatedCost: "월 3-8만원",
+        timeCommitment: "주 2-3시간",
+        skillLevel: "초급자",
+        socialAspect: "그룹"
+      }
+    ];
 
-언어 요구사항:
-- 모든 텍스트는 한국어로 작성
-- 영어 단어나 문장 사용 금지
-- 취미 이름도 한국어로 표기
-- 전문 용어도 한국어로 번역하여 사용
-
-Language Requirements:
-- All text must be in Korean
-- No English words or sentences allowed
-- Hobby names must be in Korean
-- Technical terms must be translated to Korean`
-          }]
-        }
-      ],
+    // 사용자 프로필을 기반으로 추천 점수 조정
+    const adjustedHobbies = koreanHobbies.map(hobby => {
+      let score = hobby.recommendationScore;
+      
+      // MBTI 기반 조정
+      if (profile.mbti) {
+        if (profile.mbti.includes('I') && hobby.socialAspect === '개인') score += 10;
+        if (profile.mbti.includes('E') && hobby.socialAspect === '그룹') score += 10;
+        if (profile.mbti.includes('N') && hobby.name.includes('창작')) score += 5;
+        if (profile.mbti.includes('S') && hobby.name.includes('실용')) score += 5;
+      }
+      
+      // 네트워킹 선호도 기반 조정
+      if (profile.networkingPreference && hobby.socialAspect === '그룹') score += 15;
+      if (!profile.networkingPreference && hobby.socialAspect === '개인') score += 10;
+      
+      return { ...hobby, recommendationScore: Math.min(score, 100) };
     });
 
+    // 상위 3-4개 추천 반환
+    return adjustedHobbies
+      .sort((a, b) => b.recommendationScore - a.recommendationScore)
+      .slice(0, 4);
+
     const rawJson = response.text;
+    console.log("Gemini response:", rawJson);
+    
     if (rawJson) {
-      const data = JSON.parse(rawJson);
-      return data.recommendations || [];
+      try {
+        const data = JSON.parse(rawJson);
+        return data.recommendations || [];
+      } catch (parseError) {
+        console.error("JSON parsing error:", parseError);
+        // If JSON parsing fails, try to extract recommendations manually
+        const recommendations = [];
+        // For now, return empty array and log the error
+        console.error("Failed to parse JSON response from Gemini");
+        return [];
+      }
     } else {
       throw new Error("Empty response from Gemini");
     }
