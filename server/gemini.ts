@@ -48,8 +48,8 @@ MBTI 유형, 예산, 시간 가용성, 선호도를 고려하세요.
       "description": "상세한 설명",
       "recommendationScore": number (1-100),
       "reasons": ["이유1", "이유2", "이유3"],
-      "estimatedCost": "비용 범위",
-      "timeCommitment": "필요한 시간",
+      "estimatedCost": "간단한 비용 정보",
+      "timeCommitment": "간단한 시간 정보",
       "skillLevel": "재미있는 난이도 표현",
       "socialAspect": "개인/그룹/둘 다"
     }
@@ -73,7 +73,8 @@ MBTI 유형, 예산, 시간 가용성, 선호도를 고려하세요.
 - 난이도를 이색적이고 유머러스하게 표현하되 괄호 없이 (예: "호기심 단계", "열정 폭발 단계", "마스터 지경", "전설의 경지", "신의 경지")
 - 모든 내용을 한국어로만 작성
 - 창의적이고 독특한 표현 사용
-- 비용과 시간 정보에 괄호 사용 금지`;
+- 비용과 시간 정보를 간단하고 짧게 작성 (예: "5만원", "주 2시간")
+- 괄호 사용 금지`;
 
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
