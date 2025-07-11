@@ -4,6 +4,8 @@ import {
   communityMembers,
   chatMessages,
   hobbyRecommendations,
+  lightningMeetups,
+  lightningMeetupParticipants,
   type User,
   type UpsertUser,
   type InsertUser,
@@ -14,6 +16,9 @@ import {
   type InsertChatMessage,
   type HobbyRecommendation,
   type InsertHobbyRecommendation,
+  type LightningMeetup,
+  type InsertLightningMeetup,
+  type LightningMeetupParticipant,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, sql, asc, ne } from "drizzle-orm";
@@ -40,6 +45,14 @@ export interface IStorage {
   // Hobby recommendations
   createHobbyRecommendation(recommendation: InsertHobbyRecommendation, userId: string): Promise<HobbyRecommendation>;
   getUserHobbyRecommendations(userId: string): Promise<HobbyRecommendation[]>;
+  
+  // Lightning meetup operations
+  createLightningMeetup(meetup: InsertLightningMeetup, organizerId: string): Promise<LightningMeetup>;
+  getLightningMeetups(limit?: number, offset?: number): Promise<LightningMeetup[]>;
+  getLightningMeetup(id: number): Promise<LightningMeetup | undefined>;
+  joinLightningMeetup(meetupId: number, userId: string): Promise<void>;
+  leaveLightningMeetup(meetupId: number, userId: string): Promise<void>;
+  getUserLightningMeetups(userId: string): Promise<LightningMeetup[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -260,6 +273,86 @@ export class DatabaseStorage implements IStorage {
       .from(hobbyRecommendations)
       .where(eq(hobbyRecommendations.userId, userId))
       .orderBy(desc(hobbyRecommendations.createdAt));
+  }
+
+  // Lightning meetup operations
+  async createLightningMeetup(meetup: InsertLightningMeetup, organizerId: string): Promise<LightningMeetup> {
+    const [newMeetup] = await db
+      .insert(lightningMeetups)
+      .values({
+        ...meetup,
+        organizerId,
+      })
+      .returning();
+    return newMeetup;
+  }
+
+  async getLightningMeetups(limit = 50, offset = 0): Promise<LightningMeetup[]> {
+    const meetups = await db.select().from(lightningMeetups)
+      .where(eq(lightningMeetups.isActive, true))
+      .orderBy(asc(lightningMeetups.meetingTime))
+      .limit(limit)
+      .offset(offset);
+    return meetups;
+  }
+
+  async getLightningMeetup(id: number): Promise<LightningMeetup | undefined> {
+    const [meetup] = await db.select().from(lightningMeetups).where(eq(lightningMeetups.id, id));
+    return meetup;
+  }
+
+  async joinLightningMeetup(meetupId: number, userId: string): Promise<void> {
+    await db.insert(lightningMeetupParticipants).values({
+      meetupId,
+      userId,
+    });
+    
+    // Update current participants count
+    await db.update(lightningMeetups)
+      .set({ 
+        currentParticipants: sql`${lightningMeetups.currentParticipants} + 1`,
+        updatedAt: new Date()
+      })
+      .where(eq(lightningMeetups.id, meetupId));
+  }
+
+  async leaveLightningMeetup(meetupId: number, userId: string): Promise<void> {
+    await db.delete(lightningMeetupParticipants)
+      .where(and(
+        eq(lightningMeetupParticipants.meetupId, meetupId),
+        eq(lightningMeetupParticipants.userId, userId)
+      ));
+    
+    // Update current participants count
+    await db.update(lightningMeetups)
+      .set({ 
+        currentParticipants: sql`${lightningMeetups.currentParticipants} - 1`,
+        updatedAt: new Date()
+      })
+      .where(eq(lightningMeetups.id, meetupId));
+  }
+
+  async getUserLightningMeetups(userId: string): Promise<LightningMeetup[]> {
+    const meetups = await db.select({
+      id: lightningMeetups.id,
+      title: lightningMeetups.title,
+      description: lightningMeetups.description,
+      category: lightningMeetups.category,
+      location: lightningMeetups.location,
+      meetingTime: lightningMeetups.meetingTime,
+      maxParticipants: lightningMeetups.maxParticipants,
+      currentParticipants: lightningMeetups.currentParticipants,
+      organizerId: lightningMeetups.organizerId,
+      isActive: lightningMeetups.isActive,
+      createdAt: lightningMeetups.createdAt,
+      updatedAt: lightningMeetups.updatedAt,
+    })
+    .from(lightningMeetups)
+    .innerJoin(lightningMeetupParticipants, eq(lightningMeetups.id, lightningMeetupParticipants.meetupId))
+    .where(eq(lightningMeetupParticipants.userId, userId))
+    .orderBy(asc(lightningMeetups.meetingTime));
+    
+    return meetups;
   }
 }
 

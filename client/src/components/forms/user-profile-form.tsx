@@ -39,6 +39,7 @@ interface UserProfileFormProps {
 export default function UserProfileForm({ user, onClose, onSuccess }: UserProfileFormProps) {
   const { toast } = useToast();
   const [selectedHobbies, setSelectedHobbies] = useState<string[]>(user?.blacklistedHobbies || []);
+  const [whitelistedHobbies, setWhitelistedHobbies] = useState<string[]>(user?.whitelistedHobbies || []);
 
   const form = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
@@ -100,6 +101,13 @@ export default function UserProfileForm({ user, onClose, onSuccess }: UserProfil
     "여행", "사진", "그림", "춤", "노래", "악기연주"
   ];
 
+  const uniqueHobbyOptions = [
+    "코스튬 댄스", "버블티 만들기", "마임 아티스트", "거리 버스킹",
+    "코스프레", "마술", "저글링", "라떼아트", "펜스핀", "큐브 맞추기",
+    "틱톡 댄스", "그래피티", "타로 카드", "수정 수집", "미니어처 제작",
+    "레고 아트", "종이접기", "곤충 관찰", "화석 수집", "우주 관측"
+  ];
+
   const handleHobbyToggle = (hobby: string) => {
     const newHobbies = selectedHobbies.includes(hobby)
       ? selectedHobbies.filter(h => h !== hobby)
@@ -108,8 +116,20 @@ export default function UserProfileForm({ user, onClose, onSuccess }: UserProfil
     form.setValue("blacklistedHobbies", newHobbies);
   };
 
+  const handleWhitelistToggle = (hobby: string) => {
+    const newHobbies = whitelistedHobbies.includes(hobby)
+      ? whitelistedHobbies.filter(h => h !== hobby)
+      : [...whitelistedHobbies, hobby];
+    setWhitelistedHobbies(newHobbies);
+    form.setValue("whitelistedHobbies", newHobbies);
+  };
+
   const onSubmit = (data: ProfileFormData) => {
-    updateProfile.mutate({ ...data, blacklistedHobbies: selectedHobbies });
+    updateProfile.mutate({ 
+      ...data, 
+      blacklistedHobbies: selectedHobbies,
+      whitelistedHobbies: whitelistedHobbies 
+    });
   };
 
   return (
@@ -191,6 +211,22 @@ export default function UserProfileForm({ user, onClose, onSuccess }: UserProfil
                       onCheckedChange={() => handleHobbyToggle(hobby)}
                     />
                     <Label htmlFor={hobby} className="text-sm">{hobby}</Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <Label>화이트리스트 취미 (선호하는 독특한 취미)</Label>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-2">
+                {uniqueHobbyOptions.map((hobby) => (
+                  <div key={hobby} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`whitelist-${hobby}`}
+                      checked={whitelistedHobbies.includes(hobby)}
+                      onCheckedChange={() => handleWhitelistToggle(hobby)}
+                    />
+                    <Label htmlFor={`whitelist-${hobby}`} className="text-sm">{hobby}</Label>
                   </div>
                 ))}
               </div>

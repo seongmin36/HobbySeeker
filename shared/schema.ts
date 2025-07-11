@@ -44,6 +44,7 @@ export const users = pgTable("users", {
   networkingPreference: boolean("networking_preference").default(false),
   uniqueHobbyPreference: boolean("unique_hobby_preference").default(false),
   blacklistedHobbies: text("blacklisted_hobbies").array(),
+  whitelistedHobbies: text("whitelisted_hobbies").array(),
   bio: text("bio"),
   location: varchar("location"),
   latitude: decimal("latitude"),
@@ -97,12 +98,36 @@ export const hobbyRecommendations = pgTable("hobby_recommendations", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const lightningMeetups = pgTable("lightning_meetups", {
+  id: serial("id").primaryKey(),
+  title: varchar("title").notNull(),
+  description: text("description"),
+  category: varchar("category").notNull(),
+  location: varchar("location").notNull(),
+  meetingTime: timestamp("meeting_time").notNull(),
+  maxParticipants: integer("max_participants").notNull(),
+  currentParticipants: integer("current_participants").default(0),
+  organizerId: varchar("organizer_id").references(() => users.id),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const lightningMeetupParticipants = pgTable("lightning_meetup_participants", {
+  id: serial("id").primaryKey(),
+  meetupId: integer("meetup_id").references(() => lightningMeetups.id),
+  userId: varchar("user_id").references(() => users.id),
+  joinedAt: timestamp("joined_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   communityMemberships: many(communityMembers),
   ledCommunities: many(communities),
   chatMessages: many(chatMessages),
   hobbyRecommendations: many(hobbyRecommendations),
+  organizedMeetups: many(lightningMeetups),
+  meetupParticipations: many(lightningMeetupParticipants),
 }));
 
 export const communitiesRelations = relations(communities, ({ one, many }) => ({
@@ -143,6 +168,25 @@ export const hobbyRecommendationsRelations = relations(hobbyRecommendations, ({ 
   }),
 }));
 
+export const lightningMeetupsRelations = relations(lightningMeetups, ({ one, many }) => ({
+  organizer: one(users, {
+    fields: [lightningMeetups.organizerId],
+    references: [users.id],
+  }),
+  participants: many(lightningMeetupParticipants),
+}));
+
+export const lightningMeetupParticipantsRelations = relations(lightningMeetupParticipants, ({ one }) => ({
+  meetup: one(lightningMeetups, {
+    fields: [lightningMeetupParticipants.meetupId],
+    references: [lightningMeetups.id],
+  }),
+  user: one(users, {
+    fields: [lightningMeetupParticipants.userId],
+    references: [users.id],
+  }),
+}));
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).pick({
   email: true,
@@ -157,6 +201,7 @@ export const insertUserSchema = createInsertSchema(users).pick({
   networkingPreference: true,
   uniqueHobbyPreference: true,
   blacklistedHobbies: true,
+  whitelistedHobbies: true,
   bio: true,
   location: true,
   latitude: true,
@@ -197,3 +242,17 @@ export type ChatMessage = typeof chatMessages.$inferSelect;
 export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
 export type HobbyRecommendation = typeof hobbyRecommendations.$inferSelect;
 export type InsertHobbyRecommendation = z.infer<typeof insertHobbyRecommendationSchema>;
+
+// Lightning meetup schemas
+export const insertLightningMeetupSchema = createInsertSchema(lightningMeetups).pick({
+  title: true,
+  description: true,
+  category: true,
+  location: true,
+  meetingTime: true,
+  maxParticipants: true,
+});
+
+export type LightningMeetup = typeof lightningMeetups.$inferSelect;
+export type InsertLightningMeetup = z.infer<typeof insertLightningMeetupSchema>;
+export type LightningMeetupParticipant = typeof lightningMeetupParticipants.$inferSelect;

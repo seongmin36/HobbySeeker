@@ -4,7 +4,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { generateHobbyRecommendations } from "./gemini";
-import { insertUserSchema, insertCommunitySchema, insertChatMessageSchema } from "@shared/schema";
+import { insertUserSchema, insertCommunitySchema, insertChatMessageSchema, insertLightningMeetupSchema } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -55,6 +55,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         networkingPreference: user.networkingPreference || undefined,
         uniqueHobbyPreference: user.uniqueHobbyPreference || undefined,
         blacklistedHobbies: user.blacklistedHobbies || [],
+        whitelistedHobbies: user.whitelistedHobbies || [],
       };
 
       const recommendations = await generateHobbyRecommendations(profile);
@@ -194,6 +195,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching chat messages:", error);
       res.status(500).json({ message: "Failed to fetch chat messages" });
+    }
+  });
+
+  // Lightning meetup routes
+  app.post('/api/lightning-meetups', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const meetupData = insertLightningMeetupSchema.parse(req.body);
+      const meetup = await storage.createLightningMeetup(meetupData, userId);
+      res.status(201).json(meetup);
+    } catch (error) {
+      console.error("Error creating lightning meetup:", error);
+      res.status(500).json({ message: "Failed to create lightning meetup" });
+    }
+  });
+
+  app.get('/api/lightning-meetups', isAuthenticated, async (req: any, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 50;
+      const offset = parseInt(req.query.offset as string) || 0;
+      const meetups = await storage.getLightningMeetups(limit, offset);
+      res.json(meetups);
+    } catch (error) {
+      console.error("Error fetching lightning meetups:", error);
+      res.status(500).json({ message: "Failed to fetch lightning meetups" });
+    }
+  });
+
+  app.get('/api/lightning-meetups/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const meetupId = parseInt(req.params.id);
+      const meetup = await storage.getLightningMeetup(meetupId);
+      if (!meetup) {
+        return res.status(404).json({ message: "Lightning meetup not found" });
+      }
+      res.json(meetup);
+    } catch (error) {
+      console.error("Error fetching lightning meetup:", error);
+      res.status(500).json({ message: "Failed to fetch lightning meetup" });
+    }
+  });
+
+  app.post('/api/lightning-meetups/:id/join', isAuthenticated, async (req: any, res) => {
+    try {
+      const meetupId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      await storage.joinLightningMeetup(meetupId, userId);
+      res.json({ message: "Successfully joined lightning meetup" });
+    } catch (error) {
+      console.error("Error joining lightning meetup:", error);
+      res.status(500).json({ message: "Failed to join lightning meetup" });
+    }
+  });
+
+  app.post('/api/lightning-meetups/:id/leave', isAuthenticated, async (req: any, res) => {
+    try {
+      const meetupId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      await storage.leaveLightningMeetup(meetupId, userId);
+      res.json({ message: "Successfully left lightning meetup" });
+    } catch (error) {
+      console.error("Error leaving lightning meetup:", error);
+      res.status(500).json({ message: "Failed to leave lightning meetup" });
+    }
+  });
+
+  app.get('/api/users/lightning-meetups', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const meetups = await storage.getUserLightningMeetups(userId);
+      res.json(meetups);
+    } catch (error) {
+      console.error("Error fetching user lightning meetups:", error);
+      res.status(500).json({ message: "Failed to fetch user lightning meetups" });
     }
   });
 
