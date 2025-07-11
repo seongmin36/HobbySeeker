@@ -2,13 +2,14 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { Bell, Puzzle, Menu } from "lucide-react";
+import { Bell, Puzzle, Menu, User } from "lucide-react";
 
 export default function Header() {
   const { user } = useAuth();
@@ -18,6 +19,7 @@ export default function Header() {
   const navigation = [
     { name: "홈", href: "/" },
     { name: "동호회 탐색", href: "/communities" },
+    { name: "번개 모임", href: "/lightning-meetups" },
     { name: "프로필", href: "/profile" },
   ];
 
@@ -59,12 +61,16 @@ export default function Header() {
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                  <img 
-                    src={user?.profileImageUrl || `https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=32&h=32`}
-                    alt="프로필" 
-                    className="h-8 w-8 rounded-full object-cover"
-                  />
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full p-0">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage 
+                      src={user?.profileImageUrl} 
+                      alt={user?.firstName || "사용자"}
+                    />
+                    <AvatarFallback>
+                      {user?.firstName ? user.firstName.charAt(0) : <User className="h-4 w-4" />}
+                    </AvatarFallback>
+                  </Avatar>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
