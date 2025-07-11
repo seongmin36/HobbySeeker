@@ -49,6 +49,7 @@ export const users = pgTable("users", {
   location: varchar("location"),
   latitude: decimal("latitude"),
   longitude: decimal("longitude"),
+  fcmToken: varchar("fcm_token"),
 });
 
 export const communities = pgTable("communities", {

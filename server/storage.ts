@@ -21,7 +21,7 @@ import {
   type LightningMeetupParticipant,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, sql, asc, ne } from "drizzle-orm";
+import { eq, and, desc, sql, asc, ne, like } from "drizzle-orm";
 
 export interface IStorage {
   // User operations - mandatory for Replit Auth
@@ -53,6 +53,10 @@ export interface IStorage {
   joinLightningMeetup(meetupId: number, userId: string): Promise<void>;
   leaveLightningMeetup(meetupId: number, userId: string): Promise<void>;
   getUserLightningMeetups(userId: string): Promise<LightningMeetup[]>;
+  
+  // FCM operations
+  updateUserFcmToken(userId: string, fcmToken: string): Promise<void>;
+  getUsersInArea(location: string): Promise<User[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -353,6 +357,29 @@ export class DatabaseStorage implements IStorage {
     .orderBy(asc(lightningMeetups.meetingTime));
     
     return meetups;
+  }
+
+  // FCM operations
+  async updateUserFcmToken(userId: string, fcmToken: string): Promise<void> {
+    await db
+      .update(users)
+      .set({ fcmToken, updatedAt: new Date() })
+      .where(eq(users.id, userId));
+  }
+
+  async getUsersInArea(location: string): Promise<User[]> {
+    // Extract district from location (e.g., "서울시 관악구" -> "관악구")
+    const district = this.extractDistrict(location);
+    if (!district) {
+      return [];
+    }
+
+    const result = await db
+      .select()
+      .from(users)
+      .where(like(users.location, `%${district}%`));
+    
+    return result;
   }
 }
 

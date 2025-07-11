@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
+import { useNotifications } from "@/hooks/useNotifications";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
@@ -15,6 +16,7 @@ import Header from "@/components/header";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
+  const { isInitialized, hasPermission } = useNotifications();
 
   if (isLoading) {
     return (

@@ -6,6 +6,7 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { generateHobbyRecommendations } from "./gemini";
 import { insertUserSchema, insertCommunitySchema, insertChatMessageSchema, insertLightningMeetupSchema } from "@shared/schema";
 import { z } from "zod";
+import { notifyNearbyUsersOfLightningMeetup } from "./fcm";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -33,6 +34,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating user profile:", error);
       res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+
+  // FCM token registration route
+  app.post('/api/fcm/register', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { fcmToken } = req.body;
+      
+      if (!fcmToken) {
+        return res.status(400).json({ message: "FCM token is required" });
+      }
+      
+      await storage.updateUserFcmToken(userId, fcmToken);
+      res.json({ message: "FCM token registered successfully" });
+    } catch (error) {
+      console.error("Error registering FCM token:", error);
+      res.status(500).json({ message: "Failed to register FCM token" });
     }
   });
 
@@ -204,6 +223,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const meetupData = insertLightningMeetupSchema.parse(req.body);
       const meetup = await storage.createLightningMeetup(meetupData, userId);
+      
+      // Get organizer's location for nearby user notification
+      const organizer = await storage.getUser(userId);
+      if (organizer?.location) {
+        // Send FCM notification to nearby users
+        await notifyNearbyUsersOfLightningMeetup(
+          meetup.id,
+          organizer.location,
+          meetup.title,
+          new Date(meetup.meetingTime).toLocaleString('ko-KR')
+        );
+      }
+      
       res.status(201).json(meetup);
     } catch (error) {
       console.error("Error creating lightning meetup:", error);
