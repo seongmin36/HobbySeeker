@@ -36,26 +36,42 @@ export default function Communities() {
     }
     
     const searchLower = searchTerm.toLowerCase();
+    const communityNameLower = community.name.toLowerCase();
+    const communityDescLower = community.description?.toLowerCase() || '';
+    
     const matchesSearch = !searchTerm || 
-                         community.name.toLowerCase().includes(searchLower) ||
-                         community.description?.toLowerCase().includes(searchLower) ||
-                         // Match hobby keywords with community topics
-                         searchLower.includes('침묵') && community.name.includes('명상') ||
-                         searchLower.includes('요가') && community.name.includes('요가') ||
-                         searchLower.includes('코딩') && community.name.includes('코딩') ||
-                         searchLower.includes('프로그래밍') && community.name.includes('코딩') ||
-                         searchLower.includes('독서') && community.name.includes('독서') ||
-                         searchLower.includes('책') && community.name.includes('독서') ||
-                         searchLower.includes('음악') && community.name.includes('음악') ||
-                         searchLower.includes('악기') && community.name.includes('음악') ||
-                         searchLower.includes('운동') && community.name.includes('운동') ||
-                         searchLower.includes('헬스') && community.name.includes('헬스') ||
-                         searchLower.includes('요리') && community.name.includes('요리') ||
-                         searchLower.includes('쿠킹') && community.name.includes('요리') ||
-                         searchLower.includes('그림') && community.name.includes('그림') ||
-                         searchLower.includes('미술') && community.name.includes('미술') ||
-                         searchLower.includes('사진') && community.name.includes('사진') ||
-                         searchLower.includes('포토') && community.name.includes('사진');
+                         communityNameLower.includes(searchLower) ||
+                         communityDescLower.includes(searchLower) ||
+                         // Match specific hobby keywords with community topics
+                         (searchLower.includes('마법사') && (communityNameLower.includes('플래시몹') || communityNameLower.includes('퍼포먼스'))) ||
+                         (searchLower.includes('k-팝') && (communityNameLower.includes('k-팝') || communityNameLower.includes('댄스'))) ||
+                         (searchLower.includes('아이돌') && (communityNameLower.includes('k-팝') || communityNameLower.includes('댄스'))) ||
+                         (searchLower.includes('미니어처') && (communityNameLower.includes('미니어처') || communityNameLower.includes('공방'))) ||
+                         (searchLower.includes('디지털') && (communityNameLower.includes('개발자') || communityNameLower.includes('3d') || communityNameLower.includes('디지털'))) ||
+                         (searchLower.includes('건축가') && (communityNameLower.includes('개발자') || communityNameLower.includes('3d') || communityNameLower.includes('프린팅'))) ||
+                         (searchLower.includes('캐릭터') && (communityNameLower.includes('코스프레') || communityNameLower.includes('코스튬'))) ||
+                         (searchLower.includes('춤신춤왕') && (communityNameLower.includes('댄스') || communityNameLower.includes('코스프레'))) ||
+                         (searchLower.includes('연금술사') && (communityNameLower.includes('코스튬') || communityNameLower.includes('분자') || communityNameLower.includes('요리'))) ||
+                         (searchLower.includes('미식') && (communityNameLower.includes('분자') || communityNameLower.includes('요리'))) ||
+                         (searchLower.includes('별빛') && (communityNameLower.includes('천문대') || communityNameLower.includes('망원경'))) ||
+                         (searchLower.includes('광학') && (communityNameLower.includes('천문대') || communityNameLower.includes('망원경'))) ||
+                         // General keyword matching
+                         (searchLower.includes('침묵') && communityNameLower.includes('명상')) ||
+                         (searchLower.includes('요가') && communityNameLower.includes('요가')) ||
+                         (searchLower.includes('코딩') && communityNameLower.includes('코딩')) ||
+                         (searchLower.includes('프로그래밍') && communityNameLower.includes('코딩')) ||
+                         (searchLower.includes('독서') && communityNameLower.includes('독서')) ||
+                         (searchLower.includes('책') && communityNameLower.includes('독서')) ||
+                         (searchLower.includes('음악') && communityNameLower.includes('음악')) ||
+                         (searchLower.includes('악기') && communityNameLower.includes('음악')) ||
+                         (searchLower.includes('운동') && communityNameLower.includes('운동')) ||
+                         (searchLower.includes('헬스') && communityNameLower.includes('헬스')) ||
+                         (searchLower.includes('요리') && communityNameLower.includes('요리')) ||
+                         (searchLower.includes('쿠킹') && communityNameLower.includes('요리')) ||
+                         (searchLower.includes('그림') && communityNameLower.includes('그림')) ||
+                         (searchLower.includes('미술') && communityNameLower.includes('미술')) ||
+                         (searchLower.includes('사진') && communityNameLower.includes('사진')) ||
+                         (searchLower.includes('포토') && communityNameLower.includes('사진'));
     
     const matchesCategory = !selectedCategory || selectedCategory === "all" || community.category === selectedCategory;
     return matchesSearch && matchesCategory;
