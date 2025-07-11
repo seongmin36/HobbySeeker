@@ -251,6 +251,8 @@ export const insertLightningMeetupSchema = createInsertSchema(lightningMeetups).
   location: true,
   meetingTime: true,
   maxParticipants: true,
+}).extend({
+  meetingTime: z.string().transform((str) => new Date(str)),
 });
 
 export type LightningMeetup = typeof lightningMeetups.$inferSelect;
