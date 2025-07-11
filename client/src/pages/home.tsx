@@ -15,15 +15,23 @@ export default function Home() {
   const { toast } = useToast();
   const [showProfileForm, setShowProfileForm] = useState(false);
   const [sectionsExpanded, setSectionsExpanded] = useState({
-    recommendations: true,
     communities: true,
     lightningMeetups: true,
   });
+
+  const [hobbyExpanded, setHobbyExpanded] = useState<Record<number, boolean>>({});
 
   const toggleSection = (section: keyof typeof sectionsExpanded) => {
     setSectionsExpanded(prev => ({
       ...prev,
       [section]: !prev[section]
+    }));
+  };
+
+  const toggleHobby = (hobbyId: number) => {
+    setHobbyExpanded(prev => ({
+      ...prev,
+      [hobbyId]: !prev[hobbyId]
     }));
   };
 
@@ -133,26 +141,12 @@ export default function Home() {
         <section className="mb-12">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <Sparkles className="h-5 w-5 mr-2 text-primary" />
-                  AI 맞춤 취미 추천
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => toggleSection('recommendations')}
-                  className="p-2"
-                >
-                  {sectionsExpanded.recommendations ? 
-                    <ChevronUp className="h-4 w-4" /> : 
-                    <ChevronDown className="h-4 w-4" />
-                  }
-                </Button>
+              <CardTitle className="flex items-center">
+                <Sparkles className="h-5 w-5 mr-2 text-primary" />
+                AI 맞춤 취미 추천
               </CardTitle>
             </CardHeader>
-            {sectionsExpanded.recommendations && (
-              <CardContent>
+            <CardContent>
               {recommendationsLoading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <Skeleton className="h-48" />
@@ -175,7 +169,12 @@ export default function Home() {
                         {recommendations
                           .filter((rec: any) => rec.skillLevel === "호기심단계" || rec.skillLevel === "취미탐험")
                           .map((rec: any) => (
-                            <RecommendationCard key={rec.id} recommendation={rec} />
+                            <RecommendationCard 
+                              key={rec.id} 
+                              recommendation={rec} 
+                              isExpanded={hobbyExpanded[rec.id]}
+                              onToggle={() => toggleHobby(rec.id)}
+                            />
                           ))}
                       </div>
                     </div>
@@ -196,7 +195,12 @@ export default function Home() {
                         {recommendations
                           .filter((rec: any) => rec.skillLevel === "실력향상" || rec.skillLevel === "열정폭발")
                           .map((rec: any) => (
-                            <RecommendationCard key={rec.id} recommendation={rec} />
+                            <RecommendationCard 
+                              key={rec.id} 
+                              recommendation={rec} 
+                              isExpanded={hobbyExpanded[rec.id]}
+                              onToggle={() => toggleHobby(rec.id)}
+                            />
                           ))}
                       </div>
                     </div>
@@ -217,7 +221,12 @@ export default function Home() {
                         {recommendations
                           .filter((rec: any) => rec.skillLevel === "준전문가" || rec.skillLevel === "마스터급" || rec.skillLevel === "전설급")
                           .map((rec: any) => (
-                            <RecommendationCard key={rec.id} recommendation={rec} />
+                            <RecommendationCard 
+                              key={rec.id} 
+                              recommendation={rec} 
+                              isExpanded={hobbyExpanded[rec.id]}
+                              onToggle={() => toggleHobby(rec.id)}
+                            />
                           ))}
                       </div>
                     </div>
@@ -238,7 +247,12 @@ export default function Home() {
                         {recommendations
                           .filter((rec: any) => !["호기심단계", "취미탐험", "실력향상", "열정폭발", "준전문가", "마스터급", "전설급"].includes(rec.skillLevel))
                           .map((rec: any) => (
-                            <RecommendationCard key={rec.id} recommendation={rec} />
+                            <RecommendationCard 
+                              key={rec.id} 
+                              recommendation={rec} 
+                              isExpanded={hobbyExpanded[rec.id]}
+                              onToggle={() => toggleHobby(rec.id)}
+                            />
                           ))}
                       </div>
                     </div>
@@ -256,8 +270,7 @@ export default function Home() {
                   </Button>
                 </div>
               )}
-              </CardContent>
-            )}
+            </CardContent>
           </Card>
         </section>
       )}
