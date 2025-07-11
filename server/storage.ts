@@ -16,7 +16,7 @@ import {
   type InsertHobbyRecommendation,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, sql, asc } from "drizzle-orm";
+import { eq, and, desc, sql, asc, ne } from "drizzle-orm";
 
 export interface IStorage {
   // User operations - mandatory for Replit Auth
@@ -28,6 +28,7 @@ export interface IStorage {
   createCommunity(community: InsertCommunity, leaderId: string): Promise<Community>;
   getCommunities(limit?: number, offset?: number): Promise<Community[]>;
   getCommunity(id: number): Promise<Community | undefined>;
+  getCommunitiesNearby(userLocation: string, excludeUserId: string, limit?: number, offset?: number): Promise<Community[]>;
   joinCommunity(communityId: number, userId: string): Promise<void>;
   leaveCommunity(communityId: number, userId: string): Promise<void>;
   getUserCommunities(userId: string): Promise<Community[]>;
@@ -124,6 +125,34 @@ export class DatabaseStorage implements IStorage {
       .from(communities)
       .where(eq(communities.id, id));
     return community;
+  }
+
+  async getCommunitiesNearby(userLocation: string, excludeUserId: string, limit = 50, offset = 0): Promise<Community[]> {
+    // Extract district (구) from user location
+    const userDistrict = this.extractDistrict(userLocation);
+    
+    if (!userDistrict) {
+      return [];
+    }
+
+    const communitiesList = await db.select().from(communities)
+      .where(
+        and(
+          ne(communities.leaderId, excludeUserId), // Exclude user's own communities
+          sql`location LIKE ${'%' + userDistrict + '%'}` // Match district
+        )
+      )
+      .limit(limit)
+      .offset(offset);
+    
+    return communitiesList;
+  }
+
+  private extractDistrict(location: string): string | null {
+    // Extract district (구) from location string
+    // Examples: "서울시 강남구", "부산시 해운대구", "강남구"
+    const districtMatch = location.match(/([가-힣]+구)/);
+    return districtMatch ? districtMatch[1] : null;
   }
 
   async joinCommunity(communityId: number, userId: string): Promise<void> {

@@ -116,6 +116,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/communities/nearby', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user || !user.location) {
+        return res.json([]);
+      }
+
+      const limit = parseInt(req.query.limit as string) || 50;
+      const offset = parseInt(req.query.offset as string) || 0;
+      const communities = await storage.getCommunitiesNearby(user.location, userId, limit, offset);
+      res.json(communities);
+    } catch (error) {
+      console.error("Error fetching nearby communities:", error);
+      res.status(500).json({ message: "Failed to fetch nearby communities" });
+    }
+  });
+
   app.get('/api/communities/:id', async (req, res) => {
     try {
       const id = parseInt(req.params.id);

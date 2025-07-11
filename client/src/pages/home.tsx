@@ -21,7 +21,7 @@ export default function Home() {
   });
 
   const { data: communities, isLoading: communitiesLoading } = useQuery({
-    queryKey: ["/api/communities"],
+    queryKey: ["/api/communities/nearby"],
     retry: false,
   });
 
@@ -164,7 +164,9 @@ export default function Home() {
           </h3>
           <div className="flex items-center space-x-2">
             <MapPin className="h-4 w-4 text-primary" />
-            <span className="text-sm text-gray-600">서울 강남구 기준</span>
+            <span className="text-sm text-gray-600">
+              {user?.location || "위치 정보 없음"}
+            </span>
           </div>
         </div>
         
