@@ -9,11 +9,23 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 import UserProfileForm from "@/components/forms/user-profile-form";
 import RecommendationCard from "@/components/recommendation-card";
 import CommunityCard from "@/components/community-card";
-import { MapPin, Sparkles, Users } from "lucide-react";
+import { MapPin, Sparkles, Users, ChevronDown, ChevronUp } from "lucide-react";
 
 export default function Home() {
   const { toast } = useToast();
   const [showProfileForm, setShowProfileForm] = useState(false);
+  const [sectionsExpanded, setSectionsExpanded] = useState({
+    recommendations: true,
+    communities: true,
+    lightningMeetups: true,
+  });
+
+  const toggleSection = (section: keyof typeof sectionsExpanded) => {
+    setSectionsExpanded(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
 
   const { data: user, isLoading: userLoading } = useQuery({
     queryKey: ["/api/auth/user"],
@@ -121,12 +133,26 @@ export default function Home() {
         <section className="mb-12">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <Sparkles className="h-5 w-5 mr-2 text-primary" />
-                AI 맞춤 취미 추천
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <Sparkles className="h-5 w-5 mr-2 text-primary" />
+                  AI 맞춤 취미 추천
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => toggleSection('recommendations')}
+                  className="p-2"
+                >
+                  {sectionsExpanded.recommendations ? 
+                    <ChevronUp className="h-4 w-4" /> : 
+                    <ChevronDown className="h-4 w-4" />
+                  }
+                </Button>
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            {sectionsExpanded.recommendations && (
+              <CardContent>
               {recommendationsLoading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <Skeleton className="h-48" />
@@ -230,7 +256,8 @@ export default function Home() {
                   </Button>
                 </div>
               )}
-            </CardContent>
+              </CardContent>
+            )}
           </Card>
         </section>
       )}
@@ -242,31 +269,48 @@ export default function Home() {
             <Users className="h-6 w-6 mr-2" />
             내 주변 동호회
           </h3>
-          <div className="flex items-center space-x-2">
-            <MapPin className="h-4 w-4 text-primary" />
-            <span className="text-sm text-gray-600">
-              {user?.location || "위치 정보 없음"}
-            </span>
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <MapPin className="h-4 w-4 text-primary" />
+              <span className="text-sm text-gray-600">
+                {user?.location || "위치 정보 없음"}
+              </span>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => toggleSection('communities')}
+              className="p-2"
+            >
+              {sectionsExpanded.communities ? 
+                <ChevronUp className="h-4 w-4" /> : 
+                <ChevronDown className="h-4 w-4" />
+              }
+            </Button>
           </div>
         </div>
         
-        {communitiesLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-80" />
-            ))}
-          </div>
-        ) : communities && communities.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {communities.slice(0, 6).map((community: any) => (
-              <CommunityCard key={community.id} community={community} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600">주변에 동호회가 없습니다.</p>
-          </div>
+        {sectionsExpanded.communities && (
+          <>
+            {communitiesLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[1, 2, 3].map((i) => (
+                  <Skeleton key={i} className="h-80" />
+                ))}
+              </div>
+            ) : communities && communities.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {communities.slice(0, 6).map((community: any) => (
+                  <CommunityCard key={community.id} community={community} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-600">주변에 동호회가 없습니다.</p>
+              </div>
+            )}
+          </>
         )}
       </section>
     </main>
