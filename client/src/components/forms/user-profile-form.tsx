@@ -43,11 +43,11 @@ export default function UserProfileForm({ user, onClose, onSuccess }: UserProfil
   const form = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      gender: user?.gender || "",
+      gender: user?.gender || undefined,
       age: user?.age || undefined,
-      mbti: user?.mbti || "",
-      budget: user?.budget || "",
-      timeAvailability: user?.timeAvailability || "",
+      mbti: user?.mbti || undefined,
+      budget: user?.budget || undefined,
+      timeAvailability: user?.timeAvailability || undefined,
       networkingPreference: user?.networkingPreference || false,
       uniqueHobbyPreference: user?.uniqueHobbyPreference || false,
       blacklistedHobbies: user?.blacklistedHobbies || [],

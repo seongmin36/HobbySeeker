@@ -38,9 +38,9 @@ export default function CommunityForm({ onClose, onSuccess }: CommunityFormProps
     defaultValues: {
       name: "",
       description: "",
-      category: "",
+      category: undefined,
       maxMembers: 10,
-      meetingFrequency: "",
+      meetingFrequency: undefined,
       openChatLink: "",
       location: "",
     },

@@ -22,7 +22,7 @@ export default function Communities() {
   const filteredCommunities = communities?.filter((community: any) => {
     const matchesSearch = community.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          community.description?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = !selectedCategory || community.category === selectedCategory;
+    const matchesCategory = !selectedCategory || selectedCategory === "all" || community.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -78,7 +78,7 @@ export default function Communities() {
                 <SelectValue placeholder="카테고리 선택" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">전체 카테고리</SelectItem>
+                <SelectItem value="all">전체 카테고리</SelectItem>
                 {categories.map((category) => (
                   <SelectItem key={category.value} value={category.value}>
                     {category.label}
