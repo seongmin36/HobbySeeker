@@ -105,7 +105,7 @@ export default function UserProfileForm({ user, onClose, onSuccess }: UserProfil
     "코스튬 댄스", "버블티 만들기", "마임 아티스트", "거리 버스킹",
     "코스프레", "마술", "저글링", "라떼아트", "펜스핀", "큐브 맞추기",
     "틱톡 댄스", "그래피티", "타로 카드", "수정 수집", "미니어처 제작",
-    "레고 아트", "종이접기", "곤충 관찰", "화석 수집", "우주 관측"
+    "레고 아트", "종이접기", "곤충 관찰", "곤충 요리", "화석 수집", "우주 관측"
   ];
 
   const handleHobbyToggle = (hobby: string) => {
