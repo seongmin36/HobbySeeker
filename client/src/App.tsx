@@ -9,6 +9,7 @@ import Landing from "@/pages/landing";
 import Home from "@/pages/home";
 import Profile from "@/pages/profile";
 import Communities from "@/pages/communities";
+import LightningMeetups from "@/pages/lightning-meetups";
 import Chat from "@/pages/chat";
 import Header from "@/components/header";
 
@@ -34,6 +35,7 @@ function Router() {
             <Route path="/" component={Home} />
             <Route path="/profile" component={Profile} />
             <Route path="/communities" component={Communities} />
+            <Route path="/lightning-meetups" component={LightningMeetups} />
             <Route path="/chat/:id" component={Chat} />
           </>
         )}
