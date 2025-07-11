@@ -65,7 +65,7 @@ export default function RecommendationCard({ recommendation }: RecommendationCar
               </span>
             )}
           </div>
-          <Link href="/communities">
+          <Link href={`/communities?search=${encodeURIComponent(recommendation.name)}`}>
             <Button size="sm" className="bg-secondary hover:bg-secondary/90">
               <Users className="h-3 w-3 mr-1" />
               동호회 찾기

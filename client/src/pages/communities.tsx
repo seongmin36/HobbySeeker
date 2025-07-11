@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,6 +14,16 @@ export default function Communities() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [location] = useLocation();
+
+  // Get search parameter from URL
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchParam = urlParams.get('search');
+    if (searchParam) {
+      setSearchTerm(decodeURIComponent(searchParam));
+    }
+  }, [location]);
 
   const { data: communities, isLoading } = useQuery({
     queryKey: ["/api/communities"],
@@ -20,8 +31,32 @@ export default function Communities() {
   });
 
   const filteredCommunities = communities?.filter((community: any) => {
-    const matchesSearch = community.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         community.description?.toLowerCase().includes(searchTerm.toLowerCase());
+    if (!searchTerm && (!selectedCategory || selectedCategory === "all")) {
+      return true;
+    }
+    
+    const searchLower = searchTerm.toLowerCase();
+    const matchesSearch = !searchTerm || 
+                         community.name.toLowerCase().includes(searchLower) ||
+                         community.description?.toLowerCase().includes(searchLower) ||
+                         // Match hobby keywords with community topics
+                         searchLower.includes('침묵') && community.name.includes('명상') ||
+                         searchLower.includes('요가') && community.name.includes('요가') ||
+                         searchLower.includes('코딩') && community.name.includes('코딩') ||
+                         searchLower.includes('프로그래밍') && community.name.includes('코딩') ||
+                         searchLower.includes('독서') && community.name.includes('독서') ||
+                         searchLower.includes('책') && community.name.includes('독서') ||
+                         searchLower.includes('음악') && community.name.includes('음악') ||
+                         searchLower.includes('악기') && community.name.includes('음악') ||
+                         searchLower.includes('운동') && community.name.includes('운동') ||
+                         searchLower.includes('헬스') && community.name.includes('헬스') ||
+                         searchLower.includes('요리') && community.name.includes('요리') ||
+                         searchLower.includes('쿠킹') && community.name.includes('요리') ||
+                         searchLower.includes('그림') && community.name.includes('그림') ||
+                         searchLower.includes('미술') && community.name.includes('미술') ||
+                         searchLower.includes('사진') && community.name.includes('사진') ||
+                         searchLower.includes('포토') && community.name.includes('사진');
+    
     const matchesCategory = !selectedCategory || selectedCategory === "all" || community.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
@@ -100,6 +135,18 @@ export default function Communities() {
             window.location.reload();
           }}
         />
+      )}
+
+      {/* Search Results Header */}
+      {searchTerm && (
+        <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <h3 className="text-lg font-semibold text-blue-900 mb-1">
+            "{searchTerm}" 관련 동호회 검색 결과
+          </h3>
+          <p className="text-blue-700 text-sm">
+            {filteredCommunities?.length || 0}개의 관련 동호회를 찾았습니다.
+          </p>
+        </div>
       )}
 
       {/* Communities Grid */}
