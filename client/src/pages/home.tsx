@@ -17,21 +17,16 @@ export default function Home() {
   const [sectionsExpanded, setSectionsExpanded] = useState({
     communities: true,
     lightningMeetups: true,
+    beginnerHobbies: true,
+    intermediateHobbies: true,
+    advancedHobbies: true,
+    specialHobbies: true,
   });
-
-  const [hobbyExpanded, setHobbyExpanded] = useState<Record<number, boolean>>({});
 
   const toggleSection = (section: keyof typeof sectionsExpanded) => {
     setSectionsExpanded(prev => ({
       ...prev,
       [section]: !prev[section]
-    }));
-  };
-
-  const toggleHobby = (hobbyId: number) => {
-    setHobbyExpanded(prev => ({
-      ...prev,
-      [hobbyId]: !prev[hobbyId]
     }));
   };
 
@@ -159,24 +154,37 @@ export default function Home() {
                     rec.skillLevel === "호기심단계" || rec.skillLevel === "취미탐험"
                   ).length > 0 && (
                     <div>
-                      <h3 className="text-lg font-semibold mb-4 flex items-center">
-                        <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm mr-2">
-                          🌱 초심자 단계
-                        </span>
-                        부담없이 시작할 수 있는 취미
+                      <h3 className="text-lg font-semibold mb-4 flex items-center justify-between">
+                        <div className="flex items-center">
+                          <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm mr-2">
+                            🌱 초심자 단계
+                          </span>
+                          부담없이 시작할 수 있는 취미
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => toggleSection('beginnerHobbies')}
+                          className="p-2"
+                        >
+                          {sectionsExpanded.beginnerHobbies ? 
+                            <ChevronUp className="h-4 w-4" /> : 
+                            <ChevronDown className="h-4 w-4" />
+                          }
+                        </Button>
                       </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {recommendations
-                          .filter((rec: any) => rec.skillLevel === "호기심단계" || rec.skillLevel === "취미탐험")
-                          .map((rec: any) => (
-                            <RecommendationCard 
-                              key={rec.id} 
-                              recommendation={rec} 
-                              isExpanded={hobbyExpanded[rec.id]}
-                              onToggle={() => toggleHobby(rec.id)}
-                            />
-                          ))}
-                      </div>
+                      {sectionsExpanded.beginnerHobbies && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {recommendations
+                            .filter((rec: any) => rec.skillLevel === "호기심단계" || rec.skillLevel === "취미탐험")
+                            .map((rec: any) => (
+                              <RecommendationCard 
+                                key={rec.id} 
+                                recommendation={rec} 
+                              />
+                            ))}
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -185,24 +193,37 @@ export default function Home() {
                     rec.skillLevel === "실력향상" || rec.skillLevel === "열정폭발"
                   ).length > 0 && (
                     <div>
-                      <h3 className="text-lg font-semibold mb-4 flex items-center">
-                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm mr-2">
-                          🔥 중급 단계
-                        </span>
-                        깊이 있게 즐길 수 있는 취미
+                      <h3 className="text-lg font-semibold mb-4 flex items-center justify-between">
+                        <div className="flex items-center">
+                          <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm mr-2">
+                            🔥 중급 단계
+                          </span>
+                          깊이 있게 즐길 수 있는 취미
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => toggleSection('intermediateHobbies')}
+                          className="p-2"
+                        >
+                          {sectionsExpanded.intermediateHobbies ? 
+                            <ChevronUp className="h-4 w-4" /> : 
+                            <ChevronDown className="h-4 w-4" />
+                          }
+                        </Button>
                       </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {recommendations
-                          .filter((rec: any) => rec.skillLevel === "실력향상" || rec.skillLevel === "열정폭발")
-                          .map((rec: any) => (
-                            <RecommendationCard 
-                              key={rec.id} 
-                              recommendation={rec} 
-                              isExpanded={hobbyExpanded[rec.id]}
-                              onToggle={() => toggleHobby(rec.id)}
-                            />
-                          ))}
-                      </div>
+                      {sectionsExpanded.intermediateHobbies && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {recommendations
+                            .filter((rec: any) => rec.skillLevel === "실력향상" || rec.skillLevel === "열정폭발")
+                            .map((rec: any) => (
+                              <RecommendationCard 
+                                key={rec.id} 
+                                recommendation={rec} 
+                              />
+                            ))}
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -211,24 +232,37 @@ export default function Home() {
                     rec.skillLevel === "준전문가" || rec.skillLevel === "마스터급" || rec.skillLevel === "전설급"
                   ).length > 0 && (
                     <div>
-                      <h3 className="text-lg font-semibold mb-4 flex items-center">
-                        <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-sm mr-2">
-                          💎 고급 단계
-                        </span>
-                        전문성을 키울 수 있는 취미
+                      <h3 className="text-lg font-semibold mb-4 flex items-center justify-between">
+                        <div className="flex items-center">
+                          <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-sm mr-2">
+                            💎 고급 단계
+                          </span>
+                          전문성을 키울 수 있는 취미
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => toggleSection('advancedHobbies')}
+                          className="p-2"
+                        >
+                          {sectionsExpanded.advancedHobbies ? 
+                            <ChevronUp className="h-4 w-4" /> : 
+                            <ChevronDown className="h-4 w-4" />
+                          }
+                        </Button>
                       </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {recommendations
-                          .filter((rec: any) => rec.skillLevel === "준전문가" || rec.skillLevel === "마스터급" || rec.skillLevel === "전설급")
-                          .map((rec: any) => (
-                            <RecommendationCard 
-                              key={rec.id} 
-                              recommendation={rec} 
-                              isExpanded={hobbyExpanded[rec.id]}
-                              onToggle={() => toggleHobby(rec.id)}
-                            />
-                          ))}
-                      </div>
+                      {sectionsExpanded.advancedHobbies && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {recommendations
+                            .filter((rec: any) => rec.skillLevel === "준전문가" || rec.skillLevel === "마스터급" || rec.skillLevel === "전설급")
+                            .map((rec: any) => (
+                              <RecommendationCard 
+                                key={rec.id} 
+                                recommendation={rec} 
+                              />
+                            ))}
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -237,24 +271,37 @@ export default function Home() {
                     !["호기심단계", "취미탐험", "실력향상", "열정폭발", "준전문가", "마스터급", "전설급"].includes(rec.skillLevel)
                   ).length > 0 && (
                     <div>
-                      <h3 className="text-lg font-semibold mb-4 flex items-center">
-                        <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-sm mr-2">
-                          ✨ 특별한 취미
-                        </span>
-                        독특하고 재미있는 취미
+                      <h3 className="text-lg font-semibold mb-4 flex items-center justify-between">
+                        <div className="flex items-center">
+                          <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-sm mr-2">
+                            ✨ 특별한 취미
+                          </span>
+                          독특하고 재미있는 취미
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => toggleSection('specialHobbies')}
+                          className="p-2"
+                        >
+                          {sectionsExpanded.specialHobbies ? 
+                            <ChevronUp className="h-4 w-4" /> : 
+                            <ChevronDown className="h-4 w-4" />
+                          }
+                        </Button>
                       </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {recommendations
-                          .filter((rec: any) => !["호기심단계", "취미탐험", "실력향상", "열정폭발", "준전문가", "마스터급", "전설급"].includes(rec.skillLevel))
-                          .map((rec: any) => (
-                            <RecommendationCard 
-                              key={rec.id} 
-                              recommendation={rec} 
-                              isExpanded={hobbyExpanded[rec.id]}
-                              onToggle={() => toggleHobby(rec.id)}
-                            />
-                          ))}
-                      </div>
+                      {sectionsExpanded.specialHobbies && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {recommendations
+                            .filter((rec: any) => !["호기심단계", "취미탐험", "실력향상", "열정폭발", "준전문가", "마스터급", "전설급"].includes(rec.skillLevel))
+                            .map((rec: any) => (
+                              <RecommendationCard 
+                                key={rec.id} 
+                                recommendation={rec} 
+                              />
+                            ))}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
