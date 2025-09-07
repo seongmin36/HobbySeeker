@@ -8,10 +8,6 @@ import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
 
-if (!process.env.REPLIT_DOMAINS) {
-  throw new Error("Environment variable REPLIT_DOMAINS not provided");
-}
-
 const getOidcConfig = memoize(
   async () => {
     return await client.discovery(
@@ -32,7 +28,7 @@ export function getSession() {
     tableName: "sessions",
   });
   return session({
-    secret: process.env.SESSION_SECRET!,
+    secret: process.env.SESSION_SECRET || "dummysecret",
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
@@ -54,9 +50,7 @@ function updateUserSession(
   user.expires_at = user.claims?.exp;
 }
 
-async function upsertUser(
-  claims: any,
-) {
+async function upsertUser(claims: any) {
   await storage.upsertUser({
     id: claims["sub"],
     email: claims["email"],
@@ -67,6 +61,12 @@ async function upsertUser(
 }
 
 export async function setupAuth(app: Express) {
+  // ✅ 환경변수 없으면 스킵
+  if (!process.env.REPLIT_DOMAINS) {
+    console.warn("⚠️ REPLIT_DOMAINS not provided, skipping ReplitAuth setup");
+    return;
+  }
+
   app.set("trust proxy", 1);
   app.use(getSession());
   app.use(passport.initialize());
@@ -84,8 +84,7 @@ export async function setupAuth(app: Express) {
     verified(null, user);
   };
 
-  for (const domain of process.env
-    .REPLIT_DOMAINS!.split(",")) {
+  for (const domain of process.env.REPLIT_DOMAINS.split(",")) {
     const strategy = new Strategy(
       {
         name: `replitauth:${domain}`,
@@ -93,7 +92,7 @@ export async function setupAuth(app: Express) {
         scope: "openid email profile offline_access",
         callbackURL: `https://${domain}/api/callback`,
       },
-      verify,
+      verify
     );
     passport.use(strategy);
   }
@@ -130,7 +129,7 @@ export async function setupAuth(app: Express) {
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const user = req.user as any;
 
-  if (!req.isAuthenticated() || !user.expires_at) {
+  if (!req.isAuthenticated() || !user?.expires_at) {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
