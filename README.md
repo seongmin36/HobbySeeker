@@ -28,6 +28,7 @@
 
 ## 🏗️ 기술 스택
 
+- **IDE**: Replit
 - **Frontend**: Next.js 14+, React 18, TypeScript
 - **UI**: Tailwind CSS, shadcn/ui, Radix UI
 - **Backend (BaaS)**: Firebase Authentication, Cloud Firestore
